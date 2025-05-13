@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import Image from "next/image"
 import { Eye, EyeOff } from "lucide-react"
 import { useState, useEffect } from "react"
 import { signIn } from "@/apis/auth"
@@ -60,22 +59,7 @@ export default function SignIn() {
         {" "}
         {/* Key change: Inner div takes full width up to a max-width */}
         <div className="flex flex-col">
-          {" "}
-          {/* Remove lg:flex-row, use flex-col for all screen sizes */}
-          <Button
-            variant="outline"
-            className="w-full mb-4 flex items-center justify-center gap-2 mt-5"
-            style={{ borderColor: "#f15928" }}
-          >
-            <Image src="/logos/logoGoogle.png" alt="Google Logo" width={20} height={20} />
-            Continuez avec Google
-          </Button>
-          {/* Horizontal Bars and "OU" */}
-          <div className="flex items-center justify-center gap-4 mb-6">
-            <div className="flex-1 h-1 bg-gray-300"></div>
-            <span className="text-gray-500">OU</span>
-            <div className="flex-1 h-1 bg-gray-300"></div>
-          </div>
+  
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
               {/* Email */}
@@ -118,11 +102,6 @@ export default function SignIn() {
                   </FormItem>
                 )}
               />
-              <p className="text-right text-sm text-gray-600 mt-4">
-                <a href="/login" className="text-[#f15928] hover:underline">
-                  Mot de passe oublié?
-                </a>
-              </p>
 
               {/* Submit button */}
               <Button
@@ -157,12 +136,7 @@ export default function SignIn() {
               </Button>
             </form>
           </Form>
-          <p className="text-center text-sm text-gray-600 mt-8">
-            Vous n'avez pas de compte ?{" "}
-            <a href="/sign-up" className="text-[#f15928] hover:underline">
-              Créer un compte
-            </a>
-          </p>
+        
         </div>
       </div>
     </div>

@@ -44,7 +44,7 @@ export type Plat = {
   };
 
 export interface MenuJourDto {
-    id: number;
+    id?: number;
     jour: string; // Represents the day of the week as a string (e.g., "LUNDI")
     date: string; // Use string for simplicity, or use Date if you parse it
     platDejeunerId: number | null; // ID of the main lunch dish

@@ -1,90 +1,89 @@
-"use client"
+"use client";
 
-import { createPlat } from "@/apis/plats_api"
-import { TYPE_USER } from "@/constants/constants"
-import { step1Schema } from "@/lib/schema"
-import { PlatCalories, PlatData } from "@/types/types"
-import type React from "react"
+import { createPlat, PlatCalories, PlatData, uploadPlatImage } from "@/apis/plats_api";
+import { step1Schema } from "@/lib/schema";
+import type React from "react";
 
-import { useState } from "react"
+import { useState } from "react";
 
 interface AddPlatProps {
-  showModal: boolean
-  onClose: () => void
+  showModal: boolean;
+  onClose: () => void;
 }
 
 export default function AddPlat({ showModal, onClose }: AddPlatProps) {
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(1);
   const initialStep2Data = [
     { caloriesWithSport: "", priceWithSport: "", caloriesWithoutSport: "", priceWithoutSport: "" },
     { caloriesWithSport: "", priceWithSport: "", caloriesWithoutSport: "", priceWithoutSport: "" },
     { caloriesWithSport: "", priceWithSport: "", caloriesWithoutSport: "", priceWithoutSport: "" },
-  ]
+  ];
   const initialStep1Data = {
     name: "",
     type: "",
     description: "",
     ingredients: "",
     image: null as File | null,
-  }
+  };
 
-  const [formData, setFormData] = useState(initialStep1Data)
-  const [step2Data, setStep2Data] = useState(initialStep2Data)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const [errors, setErrors] = useState<{ [key: string]: string }>({})
+  const [formData, setFormData] = useState(initialStep1Data);
+  const [step2Data, setStep2Data] = useState(initialStep2Data);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isLoading, setIsLoading] = useState(false);
 
-  if (!showModal) return null
+  if (!showModal) return null;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-    setErrors((prev) => ({ ...prev, [e.target.name]: "" })) // Clear error on change
-  }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setErrors((prev) => ({ ...prev, [e.target.name]: "" })); // Clear error on change
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      setFormData({ ...formData, image: file })
-      setImagePreview(URL.createObjectURL(file))
-      setErrors((prev) => ({ ...prev, image: "" })) // Clear error on change
+      setFormData({ ...formData, image: file });
+      setImagePreview(URL.createObjectURL(file));
+      setErrors((prev) => ({ ...prev, image: "" })); // Clear error on change
     }
-  }
+  };
 
   const handleStep2Change = (index: number, field: keyof (typeof step2Data)[number], value: string) => {
-    const updatedData = [...step2Data]
-    updatedData[index][field] = value
-    setStep2Data(updatedData)
-    setErrors((prev) => ({ ...prev, [`${field}-${index}`]: "" })) // Clear error on change
-  }
+    const updatedData = [...step2Data];
+    updatedData[index][field] = value;
+    setStep2Data(updatedData);
+    setErrors((prev) => ({ ...prev, [`${field}-${index}`]: "" })); // Clear error on change
+  };
 
   const validateStep1 = () => {
-    const result = step1Schema.safeParse(formData)
+    const result = step1Schema.safeParse(formData);
     if (!result.success) {
-      const newErrors: { [key: string]: string } = {}
+      const newErrors: { [key: string]: string } = {};
       result.error.issues.forEach((issue) => {
-        newErrors[issue.path[0]] = issue.message
-      })
-      setErrors(newErrors)
-      return false
+        newErrors[issue.path[0]] = issue.message;
+      });
+      setErrors(newErrors);
+      return false;
     }
-    return true
-  }
+    return true;
+  };
 
   const validateStep2 = () => {
-    let isValid = true
-    const newErrors: Record<string, string> = {}
+    let isValid = true;
+    const newErrors: Record<string, string> = {};
 
     // Check each field in each category
     step2Data.forEach((item, index) => {
       // Check caloriesWithSport
       if (!item.caloriesWithSport || isNaN(Number(item.caloriesWithSport)) || Number(item.caloriesWithSport) <= 0) {
-        newErrors[`caloriesWithSport-${index}`] = "Champ requis et doit être un nombre positif"
-        isValid = false
+        newErrors[`caloriesWithSport-${index}`] = "Champ requis et doit être un nombre positif";
+        isValid = false;
       }
 
       // Check priceWithSport
       if (!item.priceWithSport || isNaN(Number(item.priceWithSport)) || Number(item.priceWithSport) <= 0) {
-        newErrors[`priceWithSport-${index}`] = "Champ requis et doit être un nombre positif"
-        isValid = false
+        newErrors[`priceWithSport-${index}`] = "Champ requis et doit être un nombre positif";
+        isValid = false;
       }
 
       // Check caloriesWithoutSport
@@ -93,102 +92,112 @@ export default function AddPlat({ showModal, onClose }: AddPlatProps) {
         isNaN(Number(item.caloriesWithoutSport)) ||
         Number(item.caloriesWithoutSport) <= 0
       ) {
-        newErrors[`caloriesWithoutSport-${index}`] = "Champ requis et doit être un nombre positif"
-        isValid = false
+        newErrors[`caloriesWithoutSport-${index}`] = "Champ requis et doit être un nombre positif";
+        isValid = false;
       }
 
       // Check priceWithoutSport
       if (!item.priceWithoutSport || isNaN(Number(item.priceWithoutSport)) || Number(item.priceWithoutSport) <= 0) {
-        newErrors[`priceWithoutSport-${index}`] = "Champ requis et doit être un nombre positif"
-        isValid = false
+        newErrors[`priceWithoutSport-${index}`] = "Champ requis et doit être un nombre positif";
+        isValid = false;
       }
-    })
+    });
 
-    setErrors(newErrors)
-    return isValid
-  }
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleNext = () => {
-    if (step === 1 && !validateStep1()) return
-    if (step === 2 && !validateStep2()) return
-    setStep(step + 1)
-  }
+    if (step === 1 && !validateStep1()) return;
+    if (step === 2 && !validateStep2()) return;
+    setStep(step + 1);
+  };
 
   const convertTypePlatToEnum = (typeString: string): string => {
-    switch (typeString) {
-      case "Entrée":
-        return "ENTREE_DEJEUNER";
-      case "Plat":
-        return "PLAT_DEJEUNER";
-      case "Dessert":
-        return "DESSERT_DEJEUNER";
-      default:
-        return "PLAT"; // Default to PLAT if type is not recognized
-    }
-  };
+    switch (typeString) {
+      case "Entrée":
+        return "ENTREE";
+      case "Plat":
+        return "PLAT";
+      case "Dessert":
+        return "DESSERT";
+      default:
+        return "PLAT"; // Default to PLAT if type is not recognized
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!validateStep2()) return
-    
+    if (!validateStep2()) return;
+    setIsLoading(true);
+
+    try {
       const platCalories: PlatCalories[] = [
         {
-          typeUser: TYPE_USER[0],
-          calories: Number(step2Data[0].caloriesWithSport),
-          prix: Number(step2Data[0].priceWithSport),
-        },
-        {
-          typeUser: TYPE_USER[1],
-          calories: Number(step2Data[0].caloriesWithoutSport),
-          prix: Number(step2Data[0].priceWithoutSport),
-        },
-        {
-          typeUser: TYPE_USER[2],
-          calories: Number(step2Data[1].caloriesWithSport),
-          prix: Number(step2Data[1].priceWithSport),
-        },
-        {
-          typeUser: TYPE_USER[3],
-          calories: Number(step2Data[1].caloriesWithoutSport),
-          prix: Number(step2Data[1].priceWithoutSport),
-        },
-        {
-          typeUser: TYPE_USER[4],
+          typeUser: "PERTE_DE_POID_SPORTIF",
           calories: Number(step2Data[2].caloriesWithSport),
           prix: Number(step2Data[2].priceWithSport),
         },
         {
-          typeUser: TYPE_USER[5],
+          typeUser: "PERTE_DE_POIDS_NON_SPORTIF",
           calories: Number(step2Data[2].caloriesWithoutSport),
           prix: Number(step2Data[2].priceWithoutSport),
         },
+        {
+          typeUser: "REEQUILIBRAGE_ALIMENTAIRE_SPORTIF",
+          calories: Number(step2Data[0].caloriesWithSport),
+          prix: Number(step2Data[0].priceWithSport),
+        },
+        {
+          typeUser: "REEQUILIBRAGE_ALIMENTAIRE_NON_SPORTIF",
+          calories: Number(step2Data[0].caloriesWithoutSport),
+          prix: Number(step2Data[0].priceWithoutSport),
+        },
+        {
+          typeUser: "PRISE_DE_MASSES_PORTIF",
+          calories: Number(step2Data[1].caloriesWithSport),
+          prix: Number(step2Data[1].priceWithSport),
+        },
+        {
+          typeUser: "PRISE_DE_MASSE_NON_SPORTIF",
+          calories: Number(step2Data[1].caloriesWithoutSport),
+          prix: Number(step2Data[1].priceWithoutSport),
+        },
       ];
-    
+
       const platData: PlatData = {
         nomPlat: formData.name,
         description: formData.description,
         ingredient: formData.ingredients,
-        photo: imagePreview, // Ensure this is a valid URL or handle file upload
+        photo: "https://example.com/placeholder.jpg", // Temporary placeholder, will be updated after upload
         typePlat: convertTypePlatToEnum(formData.type),
-        platCalories,
+        platCalories: platCalories,
       };
 
-    try {
-      console.log(platData.platCalories)
-      await createPlat(platData)
-      alert("Plat créé avec succès !")
+      // First create the plat
+      const createdPlat = await createPlat(platData);
+      
+      // Then upload the image if available
+      if (formData.image && createdPlat.id) {
+        await uploadPlatImage(createdPlat.id, formData.image);
+      }
 
-      onClose()
+      alert("Plat créé avec succès !");
+      onClose();
     } catch (error) {
-      console.error("Erreur lors de la création du plat:", error)
-      alert("Erreur lors de la création du plat")
+      console.error("Erreur lors de la création du plat:", error);
+      alert("Erreur lors de la création du plat");
+    } finally {
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-screen-sm overflow-y-auto relative p-8">
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-[#F15928] hover:text-[#d9481f] p-2 bg-white rounded-full shadow"
+          disabled={isLoading}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -268,10 +277,18 @@ export default function AddPlat({ showModal, onClose }: AddPlatProps) {
             </div>
 
             <div className="flex justify-between mt-6 gap-2">
-              <button className="w-1/2 border border-[#F15928] text-[#F15928] px-4 py-2 rounded" onClick={onClose}>
+              <button 
+                className="w-1/2 border border-[#F15928] text-[#F15928] px-4 py-2 rounded" 
+                onClick={onClose}
+                disabled={isLoading}
+              >
                 Annuler
               </button>
-              <button className="w-1/2 bg-[#F15928] text-white px-4 py-2 rounded" onClick={handleNext}>
+              <button 
+                className="w-1/2 bg-[#F15928] text-white px-4 py-2 rounded" 
+                onClick={handleNext}
+                disabled={isLoading}
+              >
                 Suivant
               </button>
             </div>
@@ -345,17 +362,25 @@ export default function AddPlat({ showModal, onClose }: AddPlatProps) {
               <button
                 className="w-1/2 border border-[#F15928] text-[#F15928] px-4 py-2 rounded"
                 onClick={() => setStep(1)}
+                disabled={isLoading}
               >
                 Retour
               </button>
-              <button className="w-1/2 bg-[#F15928] text-white px-4 py-2 rounded" onClick={handleSubmit}>
-                Créer le plat
+              <button 
+                className="w-1/2 bg-[#F15928] text-white px-4 py-2 rounded flex justify-center items-center" 
+                onClick={handleSubmit}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></span>
+                ) : (
+                  "Créer le plat"
+                )}
               </button>
             </div>
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }
-

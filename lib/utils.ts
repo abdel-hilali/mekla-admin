@@ -12,11 +12,11 @@ export const getMenuDays = () => {
   const options: Intl.DateTimeFormatOptions = { timeZone: "Africa/Tunis" };
   const tunisTime = new Date(now.toLocaleString("en-US", options));
 
-  let dayOfWeek = tunisTime.getDay(); // 0 (Sunday) to 6 (Saturday)
-  let hours = tunisTime.getHours();
+  const dayOfWeek = tunisTime.getDay(); // 0 (Sunday) to 6 (Saturday)
+  const hours = tunisTime.getHours();
 
   // Get the most recent Monday
-  let monday = new Date(tunisTime);
+  const monday = new Date(tunisTime);
   monday.setDate(monday.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1)); // Adjust for Monday
 
   // If it's Friday after 17:00, move to next week's Monday
@@ -27,9 +27,9 @@ export const getMenuDays = () => {
   // Generate the menu days
   const days = [];
   for (let i = 0; i < 5; i++) {
-    let date = new Date(monday);
+    const date = new Date(monday);
     date.setDate(monday.getDate() + i);
-    let formattedDate = date.toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "2-digit", year: "2-digit" });
+    const formattedDate = date.toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "2-digit", year: "2-digit" });
     days.push(formattedDate);
   }
   return days;

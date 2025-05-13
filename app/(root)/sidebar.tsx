@@ -12,10 +12,11 @@ const menuItems = [
   { name: "Menus", path: "/menu", icon: "/logos/menu.png", activeIcon: "/logos/menuS.png" },
   { name: "Production", path: "/production", icon: "/logos/com.png", activeIcon: "/logos/comS.png" },
   { name: "Commondes", path: "/commondes", icon: "/logos/fact.png", activeIcon: "/logos/factS.png" },
-  { name: "Mes clients", path: "/clients", icon: "/logos/users.png", activeIcon: "/logos/usersS.png" },
+  { name: "Nos clients", path: "/clients", icon: "/logos/users.png", activeIcon: "/logos/usersS.png" },
+  { name: "Livreurs", path: "/livreurs", icon: "/logos/users.png", activeIcon: "/logos/usersS.png" },
   { name: "Livraison", path: "/livraison", icon: "/logos/liv.png", activeIcon: "/logos/livS.png" },
-  { name: "Facturation", path: "/facturation", icon: "/logos/fact.png", activeIcon: "/logos/factS.png" },
-  { name: "Paramètres", path: "/parametres", icon: "/logos/set.png", activeIcon: "/logos/setS.png" },
+  //{ name: "Facturation", path: "/facturation", icon: "/logos/fact.png", activeIcon: "/logos/factS.png" },
+ // { name: "Paramètres", path: "/parametres", icon: "/logos/set.png", activeIcon: "/logos/setS.png" },
 ];
 
 export default function SideBar() {

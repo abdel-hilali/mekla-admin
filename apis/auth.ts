@@ -1,7 +1,6 @@
 // src/apis/auth.js
 import { z } from "zod";
 import { signInFormSchema } from "@/formSchema/formSchema";
-import { signUpFormSchema } from "@/formSchema/formSchema"; // Import signUpFormSchema
 import { Profile } from "@/types/types";
 import { fetchWithAuth } from "./api";
 
@@ -11,7 +10,7 @@ export async function getConnectedUserId(): Promise<number | null> {
 
     if (isLoggedIn === 'true') {
         try {
-            const response = await fetchWithAuth('http://localhost:8080/auth/me', {
+            const response = await fetchWithAuth(`/api/auth/me`, {
                 credentials: 'include'
             });
 
@@ -36,7 +35,9 @@ export async function getConnectedUserId(): Promise<number | null> {
 export async function getProfileDetails(): Promise<Profile | null> {
     try {
         const user = await getConnectedUserId();
-        const response = await fetchWithAuth(`http://localhost:8080/client/${user}`, {
+        if (!user) return null;
+        
+        const response = await fetchWithAuth(`/api/auth/client/${user}`, {
             method: 'GET',
         });
 
@@ -76,7 +77,7 @@ export const signIn = async (
     formValues: z.infer<typeof signInFormSchema>
 ): Promise<boolean> => {
     try {
-        const response = await fetch("http://localhost:8080/login", {
+        const response = await fetch(`/api/auth/login`, {
             method: "POST",
             body: formData,
             credentials: "include",
@@ -98,52 +99,11 @@ export const signIn = async (
     }
 };
 
-export const signUp = async (values: z.infer<typeof signUpFormSchema>,
-
-): Promise<boolean> => {
-    try {
-        
-        const response = await fetch("http://localhost:8080/auth/register-client", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                "username": values.nom,
-                "prenom":   values.prenom,  // <---- Make sure this line is present and has a value
-                "adresseMail": values.email,
-                "password": values.motDePasse,
-                "role": "ADMIN",
-                "sexe": values.sexe,
-                "age": values.age,
-                "numTel": values.telephone,
-            }),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            const errorMessage = errorData.error || "Failed to register client.";
-            console.log(errorMessage); // Display error message
-            return false; // Indicate failure
-        }
-
-        const data = await response.json();
-        console.log("Registration successful:", data);
-        console.log("Sign up successful! Please log in."); // Customized success message
-        return true; // Indicate success
-
-    } catch (error: any) {
-        console.error("Registration error:", error);
-        console.log("An error occurred during registration."); // Generic error message
-        return false; // Indicate failure
-    }
-};
-
 // auth.js (or your data fetching file - you might need to adjust the file path)
 
 export const savePersonalInformations = async (userId: number, updatedProfile: Profile): Promise<boolean> => {
     try {
-        const response = await fetch(`http://localhost:8080/client/${userId}/update`, {
+        const response = await fetch(`/api/auth/client/${userId}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -190,7 +150,7 @@ export const savePersonalInformations = async (userId: number, updatedProfile: P
 
 export async function getProfileDetailsById(userId: number): Promise<Profile | null> {
     try {
-        const response = await fetchWithAuth(`http://localhost:8080/client/${userId}`, {
+        const response = await fetchWithAuth(`/api/auth/client/${userId}`, {
             method: 'GET',
         });
 

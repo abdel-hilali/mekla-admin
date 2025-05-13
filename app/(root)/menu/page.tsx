@@ -2,11 +2,12 @@
 import type { WeekMenu } from "@/types/types"
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
-import { format } from "date-fns"
+import { format, startOfWeek, addDays } from "date-fns"
 import { fr } from "date-fns/locale"
 import { Calendar } from "lucide-react"
-import { getMenuWeeksForMonth } from "@/apis/menu_api"
+import { getMenuWeeksForMonth, updateMenuWeekStatus } from "@/apis/menu_api"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 
 const MenuPage = () => {
   const router = useRouter()
@@ -33,20 +34,7 @@ const MenuPage = () => {
     fetchMenuWeeks()
   }, [selectedDate])
 
-  const handleDelete = async (e: React.MouseEvent, id: number) => {
-    e.stopPropagation() // Prevent row click event
-    // Here you would typically call an API to delete the menu
-    // For now, we'll just update the UI
-    setMenus(menus.filter((menu) => menu.id !== id))
-  }
 
-  const handleStatusChange = async (e: React.ChangeEvent<HTMLSelectElement>, id: number) => {
-    e.stopPropagation() // Prevent row click event
-    const isPublied = e.target.value === "published"
-    // Here you would typically call an API to update the menu status
-    // For now, we'll just update the UI
-    setMenus((prevMenus) => prevMenus.map((m) => (m.id === id ? { ...m, isPublied } : m)))
-  }
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.value) {
@@ -55,9 +43,7 @@ const MenuPage = () => {
     }
   }
 
-  // Navigate to MenuJourPage with the selected week data
   const handleWeekClick = (menu: WeekMenu) => {
-    // Encode the menu data as a URL parameter
     const encodedMenu = encodeURIComponent(JSON.stringify(menu))
     router.push(`/menu/menu_jour?weekMenu=${encodedMenu}`)
   }
@@ -76,9 +62,7 @@ const MenuPage = () => {
     }
   }, [])
 
-  // Format the date to show day and month name in French
   const formattedDate = format(selectedDate, "d MMMM yyyy", { locale: fr })
-  // Get month name for display
   const monthName = format(selectedDate, "MMMM yyyy", { locale: fr })
 
   return (
@@ -112,12 +96,40 @@ const MenuPage = () => {
             )}
           </div>
         </div>
-        <a href="/menu/menu_jour">
-          <button className="flex items-center space-x-2 bg-[#F15928] text-white px-4 py-2 rounded-lg">
-            <span>+</span>
-            <span>Créer un menu</span>
-          </button>
-        </a>
+        <button 
+          className="flex items-center space-x-2 bg-[#F15928] text-white px-4 py-2 rounded-lg"
+          onClick={() => {
+            const today = new Date();
+            const weekStart = startOfWeek(today, { weekStartsOn: 1 });
+            const weekEnd = addDays(weekStart, 6);
+            
+            const emptyWeekMenu: WeekMenu = {
+              id: 0,
+              isPublied: false,
+              dateDebut: format(weekStart, "yyyy-MM-dd"),
+              dateFin: format(weekEnd, "yyyy-MM-dd"),
+              menuJours: Array.from({ length: 5 }).map((_, i) => {
+                const day = addDays(weekStart, i);
+                return {
+                  id: 0,
+                  jour: format(day, "EEEE", { locale: fr }).toUpperCase(),
+                  date: format(day, "yyyy-MM-dd"),
+                  platDejeunerId: null,
+                  platDinerId: null,
+                  alternativesDejeunerIds: [],
+                  alternativesDinerIds: [],
+                  entreesJoursIds: [],
+                  dessertsJoursIds: [],
+                };
+              }),
+            };
+            
+            router.push(`/menu/menu_jour?weekMenu=${encodeURIComponent(JSON.stringify(emptyWeekMenu))}`);
+          }}
+        >
+          <span>+</span>
+          <span>Créer un menu</span>
+        </button>
       </div>
 
       {/* Search Input */}
@@ -128,7 +140,9 @@ const MenuPage = () => {
             placeholder="Recherche"
             className="w-full md:w-64 p-2 pl-10 rounded-lg bg-white placeholder-[#8BA3CB]"
           />
-          <img
+          <Image
+          height={200}
+          width={200}
             src="/logos/search.png"
             alt="Search"
             className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
@@ -172,25 +186,9 @@ const MenuPage = () => {
               <span>{menu.id}</span>
               <span>{menu.dateDebut}</span>
               <span>{menu.dateFin}</span>
-              <div className="flex items-center space-x-2">
-                <select
-                  value={menu.isPublied ? "published" : "archived"}
-                  onChange={(e) => handleStatusChange(e, menu.id)}
-                  className={`p-1 rounded-lg ${
-                    menu.isPublied ? "bg-[#00D37F] bg-opacity-15" : "bg-[#F6A7B5] bg-opacity-50"
-                  }`}
-                  onClick={(e) => e.stopPropagation()} // Prevent row click event
-                >
-                  <option value="published">Publié</option>
-                  <option value="archived">Archivé</option>
-                </select>
-
-                <button
-                  onClick={(e) => handleDelete(e, menu.id)}
-                  className="text-[#F15928] hover:text-[#F15928] hover:opacity-80"
-                >
-                  🗑️
-                </button>
+              <div>
+                  <span className="px-3 py-1 bg-[#00D37F] bg-opacity-15 text-[#00D37F] rounded-lg">Publié</span>
+                
               </div>
             </div>
           ))}
@@ -200,4 +198,3 @@ const MenuPage = () => {
 }
 
 export default MenuPage
-

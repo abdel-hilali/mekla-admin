@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { PlatUser, Profile } from "@/types/types"
 import { getProfileDetailsById } from "@/apis/auth"
 import { getActiviteSportif } from "@/lib/utils"
+import Image from "next/image"
 
 interface PlatUserCMDProps {
   platUser :PlatUser
@@ -28,16 +29,18 @@ export default function PlatUserCMD({ platUser,date,isStartWeek }: PlatUserCMDPr
           }
         }
         fetchPlats();
-      }, []);
+      }, [platUser.id]);
 
   return (
     <div className=" bg-[#F5F7FA]  m-3   grid grid-cols-6 gap-4 p-4 hover:bg-[#F15928] hover:bg-opacity-10 transition-colors   items-center">
     <div className=" relative flex items-center  border-opacity-0 rounded-lg ">
       <div className="flex flex-row items-center w-full">
         <div className="relative w-14 h-14 ">
-          <img
+          <Image
+          width={200}
+          height={200}
         src={user?.picture ?? '/images/unkown.JPEG'}
-        alt={user?.name}
+        alt={user?.name?? '/images/unkown.JPEG'}
         className="object-cover h-full w-full  rounded-full"
       />
         </div>
